@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória - Página Inicial</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Bem-vindo ao Jogo da Memória!</h1>
+        <p>Escolha o modo de jogo:</p>
+        <div class="buttons">
+            <button onclick="window.location.href='modo_solo.html'">Modo Solo</button>
+            <button onclick="window.location.href='modo_dupla.html'">Modo Dupla</button>
+        </div>
+    </div>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    text-align: center;
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+button {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+    .board {
+        grid-template-columns: repeat(3, 80px); /* Reduz o tamanho das cartas */
+        grid-gap: 8px;
+    }
+
+    .card {
+        width: 80px;
+        height: 80px;
+        font-size: 1.5rem; /* Reduz o tamanho da fonte das cartas */
+    }
+
+    #restartGame, #backToIndex, #startGame {
+        padding: 12px 24px;
+        font-size: 1rem;
+    }
+
+    select {
+        width: 180px; /* Ajusta a largura do select para telas menores */
+    }
+}
+
+@media (max-width: 480px) {
+    .board {
+        grid-template-columns: repeat(2, 70px); /* Ajuste ainda mais para telas pequenas */
+        grid-gap: 5px;
+    }
+
+    .card {
+        width: 70px;
+        height: 70px;
+        font-size: 1.2rem;
+    }
+
+
+    select {
+        width: 150px; /* Reduz a largura do select para dispositivos móveis */
+    }
+}
+
+    </style>
+</body>
+</html>

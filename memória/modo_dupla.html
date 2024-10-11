@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória - Modo Dupla</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Definição geral do corpo */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .game-container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+        }
+
+        .controls label,
+        .controls input,
+        .controls select {
+            font-size: 1rem;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .game-info {
+            margin-bottom: 20px;
+        }
+
+        .game-info p {
+            font-size: 1.1rem;
+            margin: 5px 0;
+        }
+
+        #currentPlayer {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background-color: #f9f9f9;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            font-size: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .card.flipped {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        #message {
+            background-color: #f9f9f9;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #message h2 {
+            font-size: 2rem;
+            color: #4CAF50;
+        }
+
+        #message p {
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        /* Tabela de histórico */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #4CAF50;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Ajustes para telas menores */
+        @media screen and (max-width: 600px) {
+            .board {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .card {
+                height: 80px;
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <h1>Jogo da Memória - Modo Dupla</h1>
+        <button onclick="window.location.href='index.html'">Voltar para a página inicial</button>
+
+        <div class="controls">
+            <label for="player1">Nome do Jogador 1:</label>
+            <input type="text" id="player1" placeholder="Jogador 1">
+
+            <label for="player2">Nome do Jogador 2:</label>
+            <input type="text" id="player2" placeholder="Jogador 2">
+
+            <label for="difficulty">Selecione o nível de dificuldade:</label>
+            <select id="difficulty">
+                <option value="easy">Fácil</option>
+                <option value="medium">Médio</option>
+                <option value="hard">Difícil</option>
+            </select>
+            <button id="startGame">Iniciar Jogo</button>
+        </div>
+
+        <div class="game-info">
+            <p><strong>Jogador Atual:</strong> <span id="currentPlayer">Jogador 1</span></p>
+            <p>Pontuação <span id="player1Name">Jogador 1</span>: <span id="scorePlayer1">0</span></p>
+            <p>Pontuação <span id="player2Name">Jogador 2</span>: <span id="scorePlayer2">0</span></p>
+            <p>Erros: <span id="errorCount">0</span></p>
+            <p>Tempo: <span id="timer">00:00</span></p>
+        </div>
+
+        <div class="board" id="board"></div>
+
+        <div id="message" class="hidden">
+            <h2>Fim de Jogo!</h2>
+            <p>O vencedor é: <span id="winner"></span></p>
+            <p>Tempo: <span id="finalTime"></span></p>
+            <p>Pontuação Final:</p>
+            <p><span id="finalPlayer1Name"></span>: <span id="finalScorePlayer1"></span></p>
+            <p><span id="finalPlayer2Name"></span>: <span id="finalScorePlayer2"></span></p>
+        </div>
+
+        <h2>Histórico de Jogos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Tempo</th>
+                    <th>Nível</th>
+                    <th>Jogador 1</th>
+                    <th>Pontuação 1</th>
+                    <th>Jogador 2</th>
+                    <th>Pontuação 2</th>
+                </tr>
+            </thead>
+            <tbody id="historyTableBody">
+                <!-- Histórico de jogos será preenchido aqui -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const cards = [
+            '🍎', '🍎', '🍌', '🍌', '🍇', '🍇', '🍉', '🍉',
+            '🍓', '🍓', '🍒', '🍒', '🍍', '🍍', '🥥', '🥥'
+        ];
+
+        let flippedCards = [];
+        let matchedCards = [];
+        let errorCount = 0;
+        let currentPlayer = 1;
+        let player1Score = 0;
+        let player2Score = 0;
+        let startTime, timerInterval;
+        let difficulty = 'easy';
+        let board = document.getElementById('board');
+        let message = document.getElementById('message');
+        let errorDisplay = document.getElementById('errorCount');
+        let timerDisplay = document.getElementById('timer');
+        let player1Name = "Jogador 1";
+        let player2Name = "Jogador 2";
+
+        document.getElementById('startGame').addEventListener('click', startGame);
+
+        function startGame() {
+            difficulty = document.getElementById('difficulty').value;
+            player1Name = document.getElementById('player1').value || "Jogador 1";
+            player2Name = document.getElementById('player2').value || "Jogador 2";
+
+            document.getElementById('player1Name').textContent = player1Name;
+            document.getElementById('player2Name').textContent = player2Name;
+
+            setupBoard();
+            resetGame();
+        }
+
+        function setupBoard() {
+            board.innerHTML = '';
+            let shuffledCards = shuffle(cards.slice(0, getCardCount(difficulty)));
+            shuffledCards.forEach(value => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.value = value;
+                card.addEventListener('click', flipCard);
+                board.appendChild(card);
+            });
+        }
+
+        function getCardCount(difficulty) {
+            switch (difficulty) {
+                case 'easy':
+                    return 8;
+                case 'medium':
+                    return 12;
+                case 'hard':
+                    return 16;
+                default:
+                    return 8;
+            }
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function flipCard() {
+            if (flippedCards.length < 2 && !this.classList.contains('flipped')) {
+                this.classList.add('flipped');
+                this.textContent = this.dataset.value;
+                flippedCards.push(this);
+
+                if (flippedCards.length === 2) {
+                    checkForMatch();
+                }
+            }
+        }
+
+        function checkForMatch() {
+            if (flippedCards[0].dataset.value === flippedCards[1].dataset.value) {
+                handleMatch();
+            } else {
+                handleMismatch();
+            }
+        }
+
+        function handleMatch() {
+            matchedCards.push(flippedCards[0].dataset.value);
+            if (currentPlayer === 1) {
+                player1Score++;
+                document.getElementById('scorePlayer1').textContent = player1Score;
+            } else {
+                player2Score++;
+                document.getElementById('scorePlayer2').textContent = player2Score;
+            }
+            resetFlippedCards();
+            checkForEndGame();
+        }
+
+        function handleMismatch() {
+            errorCount++;
+            errorDisplay.textContent = errorCount;
+            setTimeout(() => {
+                flippedCards.forEach(card => {
+                    card.classList.remove('flipped');
+                    card.textContent = '';
+                });
+                resetFlippedCards();
+                currentPlayer = currentPlayer === 1 ? 2 : 1;
+                document.getElementById('currentPlayer').textContent = currentPlayer === 1 ? player1Name : player2Name;
+            }, 1000);
+        }
+
+        function resetFlippedCards() {
+            flippedCards = [];
+        }
+
+        function checkForEndGame() {
+            if (matchedCards.length === cards.length / 2) {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            const endTime = Date.now();
+            const totalTime = Math.floor((endTime - startTime) / 1000);
+            const minutes = String(Math.floor(totalTime / 60)).padStart(2, '0');
+            const seconds = String(totalTime % 60).padStart(2, '0');
+            const formattedTime = `${minutes}:${seconds}`;
+
+            document.getElementById('winner').textContent = player1Score > player2Score ? player1Name : player2Score > player1Score ? player2Name : "Empate!";
+            document.getElementById('finalPlayer1Name').textContent = player1Name;
+            document.getElementById('finalScorePlayer1').textContent = player1Score;
+            document.getElementById('finalPlayer2Name').textContent = player2Name;
+            document.getElementById('finalScorePlayer2').textContent = player2Score;
+            document.getElementById('finalTime').textContent = formattedTime;
+            message.classList.remove('hidden');
+            saveGameHistory(formattedTime);
+        }
+
+        function resetGame() {
+            flippedCards = [];
+            matchedCards = [];
+            errorCount = 0;
+            errorDisplay.textContent = errorCount;
+            currentPlayer = 1;
+            player1Score = 0;
+            player2Score = 0;
+            document.getElementById('scorePlayer1').textContent = player1Score;
+            document.getElementById('scorePlayer2').textContent = player2Score;
+            document.getElementById('currentPlayer').textContent = player1Name;
+            startTime = Date.now();
+            startTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
+                const seconds = String(elapsedTime % 60).padStart(2, '0');
+                timerDisplay.textContent = `${minutes}:${seconds}`;
+            }, 1000);
+        }
+
+        function saveGameHistory(totalTime) {
+            const historyTableBody = document.getElementById('historyTableBody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${new Date().toLocaleDateString()}</td>
+                <td>${totalTime}</td>
+                <td>${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</td>
+                <td>${player1Name}</td>
+                <td>${player1Score}</td>
+                <td>${player2Name}</td>
+                <td>${player2Score}</td>
+            `;
+            historyTableBody.appendChild(newRow);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>Jogo da Memória</h1>
+        
+        <div class="controls">
+            <label for="difficulty">Selecione o nível de dificuldade:</label>
+            <select id="difficulty">
+                <option value="easy">Fácil</option>
+                <option value="medium">Médio</option>
+                <option value="hard">Difícil</option>
+            </select>
+            <button id="startGame">Iniciar Jogo</button>
+        </div>
+
+        <div class="game-info">
+            <p>Erros: <span id="errorCount">0</span></p>
+            <p>Tempo: <span id="timer">00:00</span></p>
+        </div>
+
+        <div class="board" id="board"></div>
+
+        <div id="message" class="hidden">
+            <h2>Parabéns! Você venceu!</h2>
+            <p>Tempo: <span id="finalTime"></span></p>
+            <p>Erros: <span id="finalErrors"></span></p>
+            <button id="restartGame">Reiniciar Jogo</button>
+            <button id="backToIndex">Voltar ao Início</button>
+        </div>
+    </div>
+
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 20px; /* Adiciona algum espaçamento interno */
+}
+
+.game-container {
+    text-align: center;
+    max-width: 100%; /* Limita a largura máxima */
+    width: 100%;
+}
+
+.controls {
+    margin-bottom: 20px;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(4, 100px);
+    grid-gap: 10px;
+    justify-content: center;
+}
+
+.card {
+    width: 100px;
+    height: 100px;
+    background-color: #ccc;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    border-radius: 5px;
+}
+
+.card.flipped {
+    background-color: #4caf50;
+}
+
+.hidden {
+    display: none;
+}
+
+#message {
+    margin-top: 20px;
+}
+
+#restartGame, #backToIndex, #startGame {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+select {
+    padding: 10px;
+    border-radius: 5px;
+    border: 2px solid #4caf50;
+    background-color: #f0f0f0;
+    font-size: 16px;
+    color: #333;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=UTF8,%3Csvg xmlns%3D"http%3A//www.w3.org/2000/svg" viewBox%3D"0 0 24 24" fill%3D"none" stroke%3D"%234caf50" stroke-width%3D"2" stroke-linecap%3D"round" stroke-linejoin%3D"round" class%3D"feather feather-chevron-down"%3E%3Cpolyline points%3D"6 9 12 15 18 9"%3E%3C/polyline%3E%3C/svg%3E');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    cursor: pointer;
+}
+
+select:hover {
+    background-color: #e0e0e0;
+}
+
+select:focus {
+    border-color: #388e3c;
+}
+
+.controls {
+    position: relative;
+    display: inline-block;
+}
+
+select {
+    width: 200px; /* Largura do select */
+    padding-right: 30px; /* Espaço para a seta */
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+    .board {
+        grid-template-columns: repeat(3, 80px); /* Reduz o tamanho das cartas */
+        grid-gap: 8px;
+    }
+
+    .card {
+        width: 80px;
+        height: 80px;
+        font-size: 1.5rem; /* Reduz o tamanho da fonte das cartas */
+    }
+
+    #restartGame, #backToIndex, #startGame {
+        padding: 12px 24px;
+        font-size: 1rem;
+    }
+
+    select {
+        width: 180px; /* Ajusta a largura do select para telas menores */
+    }
+}
+
+@media (max-width: 480px) {
+    .board {
+        grid-template-columns: repeat(2, 70px); /* Ajuste ainda mais para telas pequenas */
+        grid-gap: 5px;
+    }
+
+    .card {
+        width: 70px;
+        height: 70px;
+        font-size: 1.2rem;
+    }
+
+    #restartGame, #backToIndex, #startGame {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    select {
+        width: 150px; /* Reduz a largura do select para dispositivos móveis */
+    }
+}
+   
+
+    </style>
+
+    <script>
+        const cards = [
+            '🍎', '🍎', '🍌', '🍌', '🍇', '🍇', '🍉', '🍉',
+            '🍓', '🍓', '🍒', '🍒', '🍍', '🍍', '🥥', '🥥'
+        ];
+        
+        let flippedCards = [];
+        let matchedCards = [];
+        let errorCount = 0;
+        let startTime, timerInterval;
+        let difficulty = 'easy';
+        let board = document.getElementById('board');
+        let message = document.getElementById('message');
+        let errorDisplay = document.getElementById('errorCount');
+        let timerDisplay = document.getElementById('timer');
+        
+        document.getElementById('startGame').addEventListener('click', startGame);
+        document.getElementById('restartGame').addEventListener('click', () => {
+            message.classList.add('hidden');
+            startGame();
+        });
+        document.getElementById('backToIndex').addEventListener('click', () => {
+            window.location.href = 'index.html'; // Modifique para o caminho correto da sua página index
+        });
+        
+        function startGame() {
+            difficulty = document.getElementById('difficulty').value;
+            setupBoard();
+            resetGame();
+        }
+        
+        function setupBoard() {
+            board.innerHTML = '';
+            let shuffledCards = shuffle(cards.slice(0, getCardCountByDifficulty(difficulty)));
+            shuffledCards.forEach(card => {
+                let cardElement = document.createElement('div');
+                cardElement.classList.add('card');
+                cardElement.dataset.value = card;
+                cardElement.addEventListener('click', flipCard);
+                board.appendChild(cardElement);
+            });
+        }
+        
+        function getCardCountByDifficulty(difficulty) {
+            switch(difficulty) {
+                case 'easy':
+                    return 8;
+                case 'medium':
+                    return 12;
+                case 'hard':
+                    return 16;
+            }
+        }
+        
+        function flipCard() {
+            if (flippedCards.length < 2 && !this.classList.contains('flipped')) {
+                this.classList.add('flipped');
+                this.textContent = this.dataset.value;
+                flippedCards.push(this);
+        
+                if (flippedCards.length === 2) {
+                    setTimeout(checkMatch, 1000);
+                }
+            }
+        }
+        
+        function checkMatch() {
+            const [firstCard, secondCard] = flippedCards;
+            if (firstCard.dataset.value === secondCard.dataset.value) {
+                matchedCards.push(firstCard, secondCard);
+                if (matchedCards.length === board.children.length) {
+                    endGame();
+                }
+            } else {
+                errorCount++;
+                errorDisplay.textContent = errorCount;
+                flippedCards.forEach(card => {
+                    card.classList.remove('flipped');
+                    card.textContent = '';
+                });
+            }
+            flippedCards = [];
+        }
+        
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+        
+        function resetGame() {
+            errorCount = 0;
+            errorDisplay.textContent = errorCount;
+            flippedCards = [];
+            matchedCards = [];
+            startTimer();
+        }
+        
+        function startTimer() {
+            clearInterval(timerInterval);
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsedTime / 60).toString().padStart(2, '0');
+                const seconds = (elapsedTime % 60).toString().padStart(2, '0');
+                timerDisplay.textContent = `${minutes}:${seconds}`;
+            }, 1000);
+        }
+        
+        function endGame() {
+            clearInterval(timerInterval);
+            document.getElementById('finalTime').textContent = timerDisplay.textContent;
+            document.getElementById('finalErrors').textContent = errorCount;
+            message.classList.remove('hidden');
+        }
+    </script>
+
+</body>
+</html>
